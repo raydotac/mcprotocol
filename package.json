@@ -1,0 +1,59 @@
+{
+  "name": "@raydotac/mcprotocol",
+  "version": "1.0.1",
+  "description": "Mitsubishi MC Protocol implementation for Node.js - TypeScript and JavaScript versions. Inspired by pymcprotocol with support for iQ-R, Q, iQ-L, L, and QnA series PLCs.",
+  "main": "index.js",
+  "types": "dist/src/MCProtocol.d.ts",
+  "files": [
+    "index.js",
+    "src/",
+    "dist/src/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "test": "npm run test-js && npm run test-ts",
+    "test-js": "node test/test.js",
+    "test-ts": "npm run build && node dist/test/test-ts.js",
+    "test-ts-direct": "ts-node test/test-ts.ts"
+  },
+  "keywords": [
+    "mitsubishi",
+    "plc",
+    "mc-protocol",
+    "industrial",
+    "automation",
+    "iQ-R",
+    "Q-series",
+    "iQ-L",
+    "scada",
+    "pymcprotocol",
+    "typescript",
+    "modbus",
+    "factory",
+    "iot"
+  ],
+  "author": "raydotac",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raydotac/mcprotocol"
+  },
+  "bugs": {
+    "url": "https://github.com/raydotac/mcprotocol/issues"
+  },
+  "homepage": "https://github.com/raydotac/mcprotocol#readme",
+  "publisher": "raydotac",
+  "publishConfig": {
+    "access": "public"
+  }
+}

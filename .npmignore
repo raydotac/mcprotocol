@@ -1,0 +1,26 @@
+# Development files
+test/
+src/
+tsconfig.json
+
+# Build artifacts
+*.map
+
+# Development dependencies
+node_modules/
+.vscode/
+.git/
+
+# Temporary files
+temp/
+*.tmp
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+*.swp
+*.swo
+*~
