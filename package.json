@@ -1,6 +1,6 @@
 {
   "name": "@raydotac/mcprotocol",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Mitsubishi MC Protocol implementation for Node.js - TypeScript and JavaScript versions. Inspired by pymcprotocol with support for iQ-R, Q, iQ-L, L, and QnA series PLCs.",
   "main": "index.js",
   "types": "dist/src/MCProtocol.d.ts",
