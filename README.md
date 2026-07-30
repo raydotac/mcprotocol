@@ -7,6 +7,7 @@ A comprehensive Node.js library for communicating with Mitsubishi PLCs using the
 ✅ **Dual Implementation**: Both JavaScript and TypeScript versions  
 ✅ **Multiple PLC Support**: iQ-R, Q, iQ-L, L, and QnA series  
 ✅ **Frame Support**: 3E and 4E frame types  
+✅ **Hexadecimal Addresses**: Full support for hex addresses like B41A, XFF, Y1A0  
 ✅ **Type Safety**: Full TypeScript support with type definitions  
 ✅ **Modern API**: Promise-based with async/await  
 ✅ **Batch Operations**: Optimized reading/writing of multiple registers  
@@ -40,8 +41,12 @@ async function main() {
     const value = await plc.readRegister('D', 100);
     console.log('D100:', value);
     
-    // Read multiple registers (pymcprotocol style)
-    const values = await plc.plcRead(['D0', 'D1', 'D2', 'D3', 'D4']);
+    // Read hex address registers
+    const hexValue = await plc.readRegister('B', '41A');
+    console.log('B41A:', hexValue);
+    
+    // Read multiple registers (pymcprotocol style) - supports hex!
+    const values = await plc.plcRead(['D0', 'D1', 'B41A', 'B23B', 'XFF']);
     console.log('Values:', values);
     
     // Batch read (optimized)
@@ -101,8 +106,8 @@ interface MCProtocolOptions {
 
 - `connect(): Promise<void>` - Connect to PLC
 - `disconnect(): Promise<void>` - Disconnect from PLC
-- `readRegister(device: string, address: number): Promise<number>` - Read single register
-- `writeRegister(device: string, address: number, value: number): Promise<void>` - Write single register
+- `readRegister(device: string, address: number | string): Promise<number>` - Read single register
+- `writeRegister(device: string, address: number | string, value: number): Promise<void>` - Write single register
 - `plcRead(registers: string[]): Promise<number[]>` - Read multiple registers (pymcprotocol style)
 - `batchReadWordUnits(addresses: DeviceAddress[]): Promise<ReadResult>` - Optimized batch read
 - `batchWriteWordUnits(data: WriteData[]): Promise<void>` - Optimized batch write
@@ -123,16 +128,75 @@ const plc = new Type4E(plcType);  // plcType: PLC_TYPES.iQR or PLC_TYPES.Q
 
 ## Supported Devices
 
-| Device | Description | Example |
-|--------|-------------|---------|
-| **D** | Data registers | D0, D100, D1000 |
-| **R** | File registers | R0, R100 |
-| **ZR** | Extension file registers | ZR0, ZR100 |
-| **M** | Internal relays | M0, M100 |
-| **X** | Input contacts | X0, X10 (hex) |
-| **Y** | Output contacts | Y0, Y10 (hex) |
-| **B** | Link relays | B0, B100 (hex) |
-| **W** | Link registers | W0, W100 (hex) |
+| Device | Description | Address Format | Example |
+|--------|-------------|----------------|---------|
+| **D** | Data registers | Decimal | D0, D100, D1000 |
+| **R** | File registers | Decimal | R0, R100 |
+| **ZR** | Extension file registers | Hexadecimal | ZR0, ZR100 |
+| **M** | Internal relays | Decimal | M0, M100 |
+| **X** | Input contacts | Hexadecimal | X0, XFF, X1A0 |
+| **Y** | Output contacts | Hexadecimal | Y0, YFF, Y1A0 |
+| **B** | Link relays | Hexadecimal | B0, B41A, B23B |
+| **W** | Link registers | Hexadecimal | W0, WFF, W1000 |
+
+## Hexadecimal Address Support 🆕
+
+This library now supports hexadecimal addresses commonly used in real-world PLC applications. Many device types (like B, X, Y, W) use hexadecimal addressing in practice.
+
+### Address Formats
+
+```typescript
+// Numeric addresses (traditional)
+await plc.readRegister('D', 100);           // D100 (decimal)
+await plc.readRegister('B', 1050);          // B1050 (decimal)
+
+// String addresses with automatic base detection
+await plc.readRegister('D', '100');         // D100 (decimal string)
+await plc.readRegister('B', '41A');         // B41A (hex string → decimal 1050)
+
+// Register strings (pymcprotocol style)
+await plc.plcRead(['D100', 'B41A', 'B23B', 'XFF', 'Y1A0']);
+```
+
+### Supported Hex Devices
+
+Devices that use **hexadecimal** addressing (base 16):
+- **X, Y**: Input/Output contacts - `XFF`, `Y1A0`
+- **B**: Link relays - `B41A`, `B23B`  
+- **W**: Link registers - `WFF`, `W1000`
+- **SB, SW**: Special registers - `SBFF`, `SWFF`
+- **DX, DY**: Direct I/O - `DXFF`, `DYFF`
+- **ZR**: Extension file registers - `ZR1000`
+
+Devices that use **decimal** addressing (base 10):
+- **D, R**: Data/File registers - `D100`, `R200`
+- **M**: Internal relays - `M100`
+- **T, C**: Timers/Counters - `T100`, `C200`
+
+### Examples
+
+```typescript
+// Real-world hexadecimal addresses
+const values = await plc.plcRead([
+  'B41A',    // Link relay at hex 41A (decimal 1050)
+  'B23B',    // Link relay at hex 23B (decimal 571)
+  'XFF',     // Input contact at hex FF (decimal 255)
+  'Y1A0',    // Output contact at hex 1A0 (decimal 416)
+  'D100'     // Data register at decimal 100
+]);
+
+// Batch operations with mixed formats
+await plc.batchReadWordUnits([
+  { device: 'B', address: '41A' },   // Hex string
+  { device: 'D', address: 100 },     // Numeric
+  { device: 'X', address: 'FF' },    // Hex string
+  { device: 'D', address: '200' }    // Decimal string
+]);
+
+// Case-insensitive hex addresses
+await plc.readRegister('B', '41a');  // Same as 'B41A'
+await plc.readRegister('B', '41A');  // Same as 'B41a'
+```
 
 ## Supported PLC Series
 
